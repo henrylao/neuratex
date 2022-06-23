@@ -1,7 +1,10 @@
-
+from typing import List
 import os
 
-def to_head( projectpath ):
+# ----------------------------------------
+# LaTeX Document Boilerplate
+# ---------------------------------------
+def to_head( projectpath, packages:List[str]=None ) -> str:
     pathlayers = os.path.join( projectpath, 'layers/' ).replace('\\', '/')
     return r"""
 \documentclass[border=8pt, multi, tikz]{standalone} 
@@ -11,7 +14,7 @@ def to_head( projectpath ):
 \usetikzlibrary{3d} %for including external image 
 """
 
-def to_cor():
+def to_cor() -> str:
     return r"""
 \def\ConvColor{rgb:yellow,5;red,2.5;white,5}
 \def\ConvReluColor{rgb:yellow,5;red,5;white,5}
@@ -23,7 +26,7 @@ def to_cor():
 \def\SumColor{rgb:blue,5;green,15}
 """
 
-def to_begin():
+def to_begin() -> str:
     return r"""
 \newcommand{\copymidarrow}{\tikz \draw[-Stealth,line width=0.8mm,draw={rgb:blue,4;red,1;green,1;black,3}] (-0.3,0) -- ++(0.3,0);}
 
@@ -33,8 +36,9 @@ def to_begin():
 \tikzstyle{copyconnection}=[ultra thick,every node/.style={sloped,allow upside down},draw={rgb:blue,4;red,1;green,1;black,3},opacity=0.7]
 """
 
-# layers definition
-
+# -----------------------------------------
+# NN Layers definition
+# -----------------------------------------
 def to_input( pathfile, to='(-3,0,0)', width=8, height=8, name="temp" ):
     return r"""
 \node[canvas is zy plane at x=0] (""" + name + """) at """+ to +""" {\includegraphics[width="""+ str(width)+"cm"+""",height="""+ str(height)+"cm"+"""]{"""+ pathfile +"""}};
@@ -146,6 +150,41 @@ def to_ConvSoftMax( name, s_filer=40, offset="(0,0,0)", to="(0,0,0)", width=1, h
         }
     };
 """
+def to_FullyConnected( name, s_filer=" ", n_filer=" ", offset="(0,0,0)", to="(0,0,0)", width=1.5, height=3, depth=25, opacity=0.8, caption=" " , zlabelposition='midway'):
+    return r"""
+\pic[shift={"""+ offset +"""}] at """+ to +""" 
+    {Box={
+        name=""" + name +""",
+        caption=""" +caption + """,
+        xlabel={{ """+ '"'+str(n_filer) +'", "dummy"'+ """ }},
+        zlabel="""+ str(s_filer) +""",
+        zlabelposition="""+zlabelposition+""",
+        fill=\FcColor,
+        bandfill=\FcReluColor,
+        opacity="""+ str(opacity) +""",
+        height="""+ str(height) +""",
+        width="""+ str(width) +""",
+        depth="""+ str(depth) +"""
+        }
+    };
+"""
+
+def to_BN(name, offset="(0,0,0)", to="(0,0,0)", width=1, height=32, depth=32, opacity=0.5, caption=" "):
+    return r"""
+\pic[shift={ """+ offset +""" }] at """+ to +""" 
+    {Box={
+        name="""+name+""",
+        caption="""+ caption +r""",
+        fill=\BatchNcolor,
+        opacity="""+ str(opacity) +""",
+        height="""+ str(height) +""",
+        width="""+ str(width) +""",
+        depth="""+ str(depth) +"""
+        }
+    };
+"""
+
+
 
 # SoftMax
 def to_SoftMax( name, s_filer=10, offset="(0,0,0)", to="(0,0,0)", width=1.5, height=3, depth=25, opacity=0.8, caption=" " ):
@@ -178,6 +217,31 @@ def to_Sum( name, offset="(0,0,0)", to="(0,0,0)", radius=2.5, opacity=0.6):
     };
 """
 
+# Dotted Edges: Connect the dotted edges
+def to_dottedEdges(of, to):
+    return r"""
+\draw [densely dashed]
+("""+of+"""-nearnortheast) -- ("""+to+"""-nearnortheast)
+("""+of+"""-nearsoutheast) -- ("""+to+"""-nearsoutheast)
+("""+of+"""-farsoutheast) -- ("""+to+"""-farsoutheast)
+("""+of+"""-farnortheast) -- ("""+to+"""-farnortheast);
+"""
+
+# the code of SUM node
+def to_add( name, to, offset="(0,0,0)", opacity=0.4, caption=''):
+    return r"""
+\pic[shift={"""+ offset +"""}] at """+ to +""" 
+    {Ball={
+        name=""" + name +""",
+        caption="""+ caption +""",
+        fill=\SumColor,
+        opacity="""+ str(opacity) +""",
+        radius=2.5,
+        logo=$+$
+        }
+    };
+"""
+
 
 def to_connection( of, to):
     return r"""
@@ -193,6 +257,16 @@ def to_skip( of, to, pos=1.25):
 -- node {\copymidarrow}("""+to+"""-top)
 -- node {\copymidarrow} ("""+to+"""-north);
 """
+
+def to_unet_branch_connection(of, to, name):
+    return r"""
+\path (""" + of + """-east) -- (""" + to + """-west|-""" + of + """-west) coordinate[pos=0.5] (""" + name + """);
+\draw[connection](""" + of + """-east)--node{\midarrow}(""" + name + """)--node{\midarrow}(""" + to + """-west-|""" + name + """)--node{\midarrow}("""+ to + """-west);
+"""
+
+def to_reverse_connection( of, to): 
+    return r""" \draw [connection] ("""+of+"""-west) -- node {\midarrow} ("""+to+"""-east); """
+
 
 def to_end():
     return r"""
