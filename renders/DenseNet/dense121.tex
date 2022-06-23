@@ -1,0 +1,606 @@
+\documentclass[border=12pt, multi, tikz]{standalone}
+%\usepackage{blocks}
+% \usepackage[top=4cm,left=2cm]{geometry}
+\usepackage[fontsize=14pt]{fontsize}
+\usepackage{import}
+\subimport{../../layers/}{init}
+%\usepackage{optics}
+\usetikzlibrary{positioning}
+\usetikzlibrary{3d} %for including external image 
+
+\def\ConvColor{rgb:yellow,5;red,2.5;white,5}
+\def\ConvReluColor{rgb:yellow,5;red,5}
+\def\bnColor{rgb:green,4;red,1;blue,5;white,2}
+\def\PoolColor{rgb:red,1;black,0.3}
+\def\UnpoolColor{rgb:blue,2;green,1;black,0.3}
+\def\FcColor{rgb:blue,5;red,2.5;white,5}
+\def\FcReluColor{rgb:blue,5;red,5;white,4}
+\def\SoftmaxColor{rgb:magenta,5;black,7}
+\def\SumColor{rgb:blue,5;green,15}
+\def\LayerColor{rgb:black,1}
+\def\bottleColor{rgb:blue,10;red,7;yellow,3}
+
+\newcommand{\copymidarrow}{\tikz \draw[-Stealth,line width =1mm,draw={rgb:blue,4;red,1;green,1;black,3}] (-0.3,0) -- ++(0.3,0);}
+
+
+\begin{document}
+\noindent
+\begin{tikzpicture}
+	\tikzstyle{connection}=[ultra thick,every node/.style={sloped,allow upside down},draw=\edgecolor,opacity=0.7];
+	\tikzstyle{dense_con}=[-latex,ultra thick,every node/.style={sloped,allow upside down},draw=\edgecolor,opacity=0.5];
+	\tikzstyle{copyconnection}=[ultra thick,every node/.style={sloped,allow upside down},draw={rgb:blue,4;red,1;green,1;black,3},opacity=0.7];
+
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	%% Draw Encoder
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	% input picture
+	%\node[canvas is zy plane at x=0,opacity=0.5,] (temp) at (5,7.5,0) {\includegraphics[width=-20cm,height=20cm]{123.png}};
+	\path (0,0,0);
+	% input
+	%\pic[shift={(0,0,0)}] at (0,0,0) {Box={name=input,caption=Input,		xlabel= 3,	ylabel=224,		zlabel= \qquad 224,fill=\ConvColor,	height=100,	width=0.1,				depth=100	}};
+	% conv1
+	\pic[shift={(1,0,0)}] at (0,0,0) {
+		Box={
+				name= conv1,
+				caption=Conv 7x7,
+				xlabel={{"64",""}},
+				ylabel=112,
+				zlabel= \qquad 112,
+				fill=\ConvColor,
+				height=50,
+				width=2.1,
+				depth=50
+			}
+	};
+	\draw[connection](-2,0,0) -- node{\midarrow}(conv1-west);
+	% MaxPool2d
+	\pic[shift={(0,0,0)}] at (conv1-east) {
+		Box={
+			name= MaxPool,
+			caption=Pooling,
+			xlabel={{"64",""}},
+			ylabel=56,
+			zlabel= \qquad 56,
+			fill=\PoolColor,
+			height=25,
+			width=2.1,
+			depth=25
+		}
+	};
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% block1
+\pic[shift={(2,0,0)}] at (MaxPool-west) {Box={name=block1,caption=Dense \, Block(1)\\6 $\times$ Bottleneck,%
+		xlabel={{"","dummy"}},fill=,opacity=0.1,height=30,width={50},depth=30}};
+
+\pic[shift={(1,0,0)}] at (block1-west) {
+	Box={
+		name=b1_b1,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.3,
+		height=25,
+		width={2},
+		depth=25
+	}
+};
+
+\pic[shift={(1.5,0,0)}] at (b1_b1-west) {
+	Box={
+		name=b1_b2,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.4,
+		height=25,
+		width={2},
+		depth=25
+	}
+};
+\pic[shift={(1.5,0,0)}] at (b1_b2-west) {
+	Box={
+		name=b1_b3,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.5,
+		height=25,
+		width={2},
+		depth=25
+	}
+};
+\pic[shift={(1.5,0,0)}] at (b1_b3-west) {
+	Box={
+		name=b1_b4,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.6,
+		height=25,
+		width={2},
+		depth=25
+	}
+};
+\pic[shift={(1.5,0,0)}] at (b1_b4-west) {
+	Box={
+		name=b1_b5,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.7,
+		height=25,
+		width={2},
+		depth=25
+	}
+};
+\pic[shift={(1.5,0,0)}] at (b1_b5-west) {
+	Box={
+		name=b1_b6,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.7,
+		height=25,
+		width={2},
+		depth=25
+	}
+};
+
+% lines
+\draw [connection](MaxPool-east) -- node{\midarrow} (b1_b1-west);
+
+%{[sep=.25cm].Rays[sep=.25cm]}
+
+\draw [dense_con] (b1_b1-north) parabola [parabola height=1cm] (b1_b2-north);
+\draw [dense_con] (b1_b1-north) parabola [parabola height=2cm] (b1_b3-north);
+\draw [dense_con] (b1_b1-north) parabola [parabola height=3cm] (b1_b4-north);
+\draw [dense_con] (b1_b1-north) parabola [parabola height=4cm] (b1_b5-north);
+\draw [dense_con] (b1_b1-north) parabola [parabola height=5cm] (b1_b6-north);
+
+\draw [dense_con] (b1_b2-north) parabola [parabola height=1cm] (b1_b3-north);
+\draw [dense_con] (b1_b2-north) parabola [parabola height=2cm] (b1_b4-north);
+\draw [dense_con] (b1_b2-north) parabola [parabola height=3cm] (b1_b5-north);
+\draw [dense_con] (b1_b2-north) parabola [parabola height=4cm] (b1_b6-north);
+
+\draw [dense_con] (b1_b3-north) parabola [parabola height=1cm] (b1_b4-north);
+\draw [dense_con] (b1_b3-north) parabola [parabola height=2cm] (b1_b5-north);
+\draw [dense_con] (b1_b3-north) parabola [parabola height=3cm] (b1_b6-north);
+
+\draw [dense_con] (b1_b4-north) parabola [parabola height=1cm] (b1_b5-north);
+\draw [dense_con] (b1_b4-north) parabola [parabola height=2cm] (b1_b6-north);
+
+\draw [dense_con] (b1_b5-north) parabola [parabola height=1cm] (b1_b6-north);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	% conv1x1
+\pic[shift={(1,0,0)}] at (block1-east) {
+	Box={
+		name= conv2,
+		caption=Conv 1x1,
+		xlabel={{" ",""}},
+		ylabel=56,
+		zlabel= \qquad 56,
+		fill=\ConvColor,
+		height=25,
+		width=2.1,
+		depth=25
+	}
+};
+% MaxPool2d
+\pic[shift={(0,0,0)}] at (conv2-east) {
+	Box={
+		name= Pool2,
+		caption=,
+		xlabel={{"",""}},
+		ylabel=28,
+		zlabel= \qquad 28,
+		fill=\PoolColor,
+		height=12.5,
+		width=2.1,
+		depth=12.5
+	}
+};
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%  block 2
+
+\pic[shift={(2.5,0,0)}] at (block1-east) {Box={name=block2,caption=Dense \, Block(2)\\12 $\times$ Bottleneck,%
+		xlabel={{"","dummy"}},fill=,opacity=0.1,height=20,width={40},depth=20}};
+
+\pic[shift={(0.5,0,0)}] at (block2-west) {
+	Box={
+		name=b2_b1,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.3,
+		height=12.5,
+		width={3},
+		depth=12.5
+	}
+};
+\pic[shift={(1.5,0,0)}] at (b2_b1-west) {
+	Box={
+		name=b2_b2,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.4,
+		height=12.5,
+		width={3},
+		depth=12.5
+	}
+};
+\pic[shift={(1.5,0,0)}] at (b2_b2-west) {
+	Box={
+		name=b2_b3,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.5,
+		height=12.5,
+		width={3},
+		depth=12.5
+	}
+};
+\node[shift={(1,0,0)}] at (b2_b3-east){\textbf{\HUGE $\cdots$}};
+\node[shift={(1,3,0)}] at (b2_b3-east){\HUGE $\cdots$};
+\pic[shift={(3,0,0)}] at (b2_b3-west) {
+	Box={
+		name=b2_b12,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.9,
+		height=12.5,
+		width={3},
+		depth=12.5
+	}
+};
+
+
+\draw [connection](b1_b6-east) -- node{\midarrow} (conv2-west);
+\draw [connection](Pool2-east) -- node{\midarrow} (b2_b1-west);
+
+\draw [dense_con] (b2_b1-north) parabola [parabola height=1cm] (b2_b2-north);
+\draw [dense_con] (b2_b1-north) parabola [parabola height=2cm] (b2_b3-north);
+\draw [dense_con] (b2_b1-north) parabola [parabola height=6cm] (b2_b12-north);
+
+\draw [dense_con] (b2_b2-north) parabola [parabola height=1cm] (b2_b3-north);
+\draw [dense_con] (b2_b2-north) parabola [parabola height=5cm] (b2_b12-north);
+
+\draw [dense_con] (b2_b3-north) parabola [parabola height=4cm] (b2_b12-north);
+%%%%%%%%%%%^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	% conv1x1
+\pic[shift={(0.75,0,0)}] at (block2-east) {
+	Box={
+		name= conv3,
+		caption= \\ Conv 1x1,
+		xlabel={{" ",""}},
+		ylabel=28,
+		zlabel=28,
+		fill=\ConvColor,
+		height=12.5,
+		width=2.1,
+		depth=12.5
+	}
+};
+% MaxPool2d
+\pic[shift={(0,0,0)}] at (conv3-east) {
+	Box={
+		name= Pool3,
+		caption=,
+		xlabel={{"",""}},
+		ylabel=14,
+		zlabel=14,
+		fill=\PoolColor,
+		height=6.25,
+		width=2.1,
+		depth=6.25
+	}
+};
+
+%%%%%%%%%%%%%%%%%%%%%%%%(((((((((((((((((((())))))))))))))))))))
+% block3
+\pic[shift={(2,0,0)}] at (block2-east) {Box={name=block3,caption=Dense \, Block(3)\\24 $\times$ Bottleneck,%
+		xlabel={{"","dummy"}},fill=,opacity=0.1,height=12,width={40},depth=12}};
+
+\pic[shift={(0.5,0,0)}] at (block3-west) {
+	Box={
+		name=b3_b1,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.3,
+		height=6.25,
+		width={4},
+		depth=6.25
+	}
+};
+\pic[shift={(1.5,0,0)}] at (b3_b1-west) {
+	Box={
+		name=b3_b2,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.4,
+		height=6.25,
+		width={4},
+		depth=6.25
+	}
+};
+\pic[shift={(1.5,0,0)}] at (b3_b2-west) {
+	Box={
+		name=b3_b3,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.5,
+		height=6.25,
+		width={4},
+		depth=6.25
+	}
+};
+\node[shift={(1,0,0)}] at (b3_b3-east){\textbf{\HUGE $\cdots$}};
+\node[shift={(1,3,0)}] at (b3_b3-east){\HUGE $\cdots$};
+\pic[shift={(3,0,0)}] at (b3_b3-west) {
+	Box={
+		name=b3_b24,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.95,
+		height=6.25,
+		width={4},
+		depth=6.25
+	}
+};
+
+
+\draw [connection](b2_b12-east) -- node{\midarrow} (conv3-west);
+\draw [connection](Pool3-east) -- node{\midarrow} (b3_b1-west);
+
+\draw [dense_con] (b3_b1-north) parabola [parabola height=1cm] (b3_b2-north);
+\draw [dense_con] (b3_b1-north) parabola [parabola height=2cm] (b3_b3-north);
+\draw [dense_con] (b3_b1-north) parabola [parabola height=6cm] (b3_b24-north);
+
+\draw [dense_con] (b3_b2-north) parabola [parabola height=1cm] (b3_b3-north);
+\draw [dense_con] (b3_b2-north) parabola [parabola height=5cm] (b3_b24-north);
+
+\draw [dense_con] (b3_b3-north) parabola [parabola height=4cm] (b3_b24-north);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	% conv1x1
+\pic[shift={(0.75,0,0)}] at (block3-east) {
+	Box={
+		name= conv4,
+		caption= \\ Conv 1x1,
+		xlabel={{" ",""}},
+		ylabel=14,
+		zlabel=14,
+		fill=\ConvColor,
+		height=6.25,
+		width=2.1,
+		depth=6.25
+	}
+};
+% MaxPool2d
+\pic[shift={(0,0,0)}] at (conv4-east) {
+	Box={
+		name= Pool4,
+		caption=,
+		xlabel={{"",""}},
+		ylabel=7,
+		zlabel=7,
+		fill=\PoolColor,
+		height=3.125,
+		width=2.1,
+		depth=3.125
+	}
+};
+%%%%%%%%%%%%%%%%%%%%%%$$$$$$$$$$$$$$$$$############@@@@@@@@@@@@@@@@@@@**8899
+% block4
+\pic[shift={(2,0,0)}] at (block3-east) {Box={name=block4,caption=Dense \, Block(4)\\16 $\times$ Bottleneck,%
+		xlabel={{"","dummy"}},fill=,opacity=0.1,height=7,width={40},depth=7}};
+
+\pic[shift={(0.5,0,0)}] at (block4-west) {
+	Box={
+		name=b4_b1,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.3,
+		height=3.125,
+		width={5},
+		depth=3.125
+	}
+};
+\pic[shift={(1.5,0,0)}] at (b4_b1-west) {
+	Box={
+		name=b4_b2,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.4,
+		height=3.125,
+		width={5},
+		depth=3.125
+	}
+};
+\pic[shift={(1.5,0,0)}] at (b4_b2-west) {
+	Box={
+		name=b4_b3,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.5,
+		height=3.125,
+		width={5},
+		depth=3.125
+	}
+};
+\node[shift={(1,0,0)}] at (b4_b3-east){\textbf{\HUGE $\cdots$}};
+\node[shift={(1,3,0)}] at (b4_b3-east){\HUGE $\cdots$};
+\pic[shift={(3,0,0)}] at (b4_b3-west) {
+	Box={
+		name=b4_b16,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.95,
+		height=3.125,
+		width={5},
+		depth=3.125
+	}
+};
+
+
+\draw [connection](b3_b24-east) -- node{\midarrow} (conv4-west);
+\draw [connection](Pool4-east) -- node{\midarrow} (b4_b1-west);
+
+\draw [dense_con] (b4_b1-north) parabola [parabola height=1cm] (b4_b2-north);
+\draw [dense_con] (b4_b1-north) parabola [parabola height=2cm] (b4_b3-north);
+\draw [dense_con] (b4_b1-north) parabola [parabola height=6cm] (b4_b16-north);
+
+\draw [dense_con] (b4_b2-north) parabola [parabola height=1cm] (b4_b3-north);
+\draw [dense_con] (b4_b2-north) parabola [parabola height=5cm] (b4_b16-north);
+
+\draw [dense_con] (b4_b3-north) parabola [parabola height=4cm] (b4_b16-north);
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	% pool2d
+\pic[shift={(2,0,0)}] at (block4-east) {
+	Box={
+		name=avgpool,
+		caption= \\ avgpool,
+		xlabel={{"1",""}},
+		ylabel=1,
+		zlabel=\qquad 512,
+		fill=\PoolColor,
+		height=2,
+		width=2,
+		depth=80
+	}
+};
+
+
+	% fullconnection
+	\pic[shift={(2,0,0)}] at (avgpool-east) {
+		RightBandedBox={
+				name=fc,
+				caption=\makebox[0pt]{
+					 \shortstack[c]{\\ full \, connection\\softmax}},
+				xlabel={{"1",""}},
+				zlabel=\qquad 7,
+				fill=\FcColor,
+				bandfill=\SoftmaxColor,
+				height=2,
+				width=2,
+				depth=20
+			}
+	};
+\draw [connection] (b4_b16-east) --	node {\midarrow} (avgpool-west);
+\path (fc-east) ++ (1,0,0) coordinate (output);
+\draw [connection] (fc-east) --	node {\midarrow} (output);
+
+% connections
+%	\draw [connection]  		(input-east)			-- 	node {\midarrow} 	(conv1-west);
+
+
+\draw [connection](avgpool-east) -- node {\midarrow}(fc-west);
+	% pool & fullconnection
+\draw	[densely dashed]  (avgpool-nearnortheast)    	--  									(fc-nearnorthwest);
+\draw	[densely dashed]  (avgpool-nearsoutheast)    	--  									(fc-nearsouthwest);
+\draw	[densely dashed]  (avgpool-farnortheast)    	--  									(fc-farnorthwest);
+\draw	[densely dashed]  (avgpool-farsoutheast)    	--  									(fc-farsouthwest);
+%
+	%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%------------------------------------------------------------
+%%%%%%% Bottleneck
+\pic[shift={(14,-8,0)}] at (MaxPool-west) {Box={name=Bottleneck,caption=Bottleneck,%
+		xlabel={{"","dummy"}},fill=,opacity=0.1,height=25,width={25},depth=25}};
+	
+\node[shift={(1.5,0,0)}] at (Bottleneck-east){\LARGE $=$};
+\pic[shift={(3,0,0)}] at (Bottleneck-east) {
+	Box={
+		name=b1_b1,
+		caption= ,
+		xlabel={{"","dummy"}},
+		fill=\bottleColor,
+		opacity=0.5,
+		height=20,
+		width={3},
+		depth=20
+	}
+};
+
+\pic[shift={(1,0,0)}] at (Bottleneck-west) {
+	RightBandedBox={
+		name= bo_bn1,
+		caption = \tiny{BN+ReLu},
+		xlabel={{"",""}},
+		fill=\bnColor,
+		bandfill=\ConvReluColor,
+		height=20,
+		width=2.5,
+		depth=20
+	}
+};
+\pic[shift={(0,0,0)}] at (bo_bn1-east) {
+	Box={
+		name=bo_conv1,
+		caption=\vspace{-1cm} \tiny Conv1x1,
+		fill=\ConvColor,
+		height=20,
+		width=2.5,
+		depth=20
+	}
+};
+\pic[shift={(1.25,0,0)}] at (bo_conv1-west) {
+	RightBandedBox={
+		name= bo_bn2,
+		caption = \tiny BN+ReLu,
+		xlabel={{"",""}},
+		fill=\bnColor,
+		bandfill=\ConvReluColor,
+		height=20,
+		width=2.5,
+		depth=20
+	}
+};
+\pic[shift={(0,0,0)}] at (bo_bn2-east) {
+	Box={
+		name=bo_conv2,
+		caption=\vspace{-1cm} \tiny Conv3x3,
+		fill=\ConvColor,
+		height=20,
+		width=2.5,
+		depth=20
+	}
+};
+
+\pic[shift={(0.5,0,0)}] at (bo_conv2-east) {
+	Ball={
+		name=concat,
+		caption=\tiny{Concat},
+		fill=\SumColor,
+		opacity=0.8,
+		radius=1.5,
+		logo= \(+\)
+	}
+};
+
+
+\draw [connection](Bottleneck-west) -- (bo_bn1-west);
+\draw [connection](bo_conv1-east) --node{\midarrow} (bo_bn2-west);
+\draw [connection] (bo_conv2-east) -- (concat-west);
+\draw [connection] (concat-east) -- node {\midarrow} (Bottleneck-east);
+%%&&&&&&&&&&&&&&&&&&#########---------------------------------
+
+\path (Bottleneck-west) -- (bo_bn1-west) coordinate[pos=0.5] (bo_1);
+\path (bo_1) ++ (0,0,2.5) coordinate (bo_1_above);
+\path (concat-west) ++ (0,0,2.5) coordinate (concat-north-above);
+\draw [connection] (bo_1) -- node {\midarrow} (bo_1_above|-concat-north-above) -- node {\midarrow} (concat-north-above) -- node {\midarrow} (concat-west);
+
+\end{tikzpicture}
+\end{document}
